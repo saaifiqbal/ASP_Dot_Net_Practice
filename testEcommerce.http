@@ -1,0 +1,23 @@
+@testEcommerce_HostAddress = http://localhost:5171
+
+# GET {{testEcommerce_HostAddress}}/weatherforecast/
+# Accept: application/json
+
+###
+
+POST  http://localhost:5171/api/categories
+Content-Type: application/json
+
+{
+  "CategoryName": "string",
+  "CategoryDescription": "string",
+}
+###
+
+DELETE http://localhost:5171/api/categories/{categoryId:int}
+Content-Type: application/json
+
+{
+  "CategoryName": "string",
+  "CategoryDescription": "string",
+}
