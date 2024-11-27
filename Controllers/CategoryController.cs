@@ -1,10 +1,11 @@
+using asp_net_ecommerce_web_api.DTO;
 using asp_net_ecommerce_web_api.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace asp_net_ecommerce_web_api.Controllers
 {
     [ApiController]
-    [Route("api/controller/")]
+    [Route("api/categories/")]
     public class CategoryController : ControllerBase
     {
         private static List<Category> categories = new List<Category>();
@@ -13,28 +14,60 @@ namespace asp_net_ecommerce_web_api.Controllers
         [HttpGet]
         public IActionResult GetCategories()
         {
-            return Ok(new { Message = "Successfully Get", isSuccess = true, Results = categories });
+            var newCategory = categories.Select(c=> new ReadCreateDto {
+                CategoryId = c.CategoryId,
+                CategoryName = c.CategoryName,
+                CategoryDescription = c.CategoryDescription,
+                CreatedAt= c.CreatedAt
+            });
+            return Ok(new { Message = "Successfully Get", isSuccess = true, Results = newCategory });
         }
 
         //GET: api/category?SearchValue="" => Find and Retrieve Data
-        [HttpGet("{categoryId:guid}")]
-        public IActionResult GetCategory(string searchValue)
+        [HttpGet("search")]
+        public IActionResult GetCategory([FromQuery] string? searchValue = "")
         {
-            if (string.IsNullOrEmpty(searchValue))
+            // Check if a search value was provided
+            if (!string.IsNullOrEmpty(searchValue))
             {
-                var foundCategory = categories.Where(c => c.CategoryName == searchValue);
-                if (foundCategory != null)
-                {
-                    return Ok(new { Message = "Successfully Get", isSuccess = true, Results = foundCategory });
-                }
-            }
-            return Ok(new { Message = "Successfully Get", isSuccess = true, Results = categories });
+                // Search categories by name (case-insensitive, partial matches)
+                var foundCategories = categories
+                    .Where(c => c.CategoryName != null &&
+                                c.CategoryName.Contains(searchValue, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
 
+                // Return found categories or a "not found" message
+                if (foundCategories.Any())
+                {
+                    return Ok(new
+                    {
+                        Message = "Successfully retrieved matching categories.",
+                        isSuccess = true,
+                        Results = foundCategories
+                    });
+                }
+
+                return NotFound(new
+                {
+                    Message = "No matching categories found.",
+                    isSuccess = false,
+                    Results = Array.Empty<Category>()
+                });
+            }
+
+            // If no search value provided, return all categories
+            return Ok(new
+            {
+                Message = "Successfully retrieved all categories.",
+                isSuccess = true,
+                Results = categories
+            });
         }
+
 
         //POST: api/category => Create Category
         [HttpPost]
-        public IActionResult CreateCategory(Category categoryData)
+        public IActionResult CreateCategory(CategoryCreateDto categoryData)
         {
             var newCategory = new Category
             {
@@ -49,7 +82,7 @@ namespace asp_net_ecommerce_web_api.Controllers
 
         //PUT: api/category/{categoryId} => Update Category
         [HttpPut("{categoryId:guid}")]
-        public IActionResult UpdateCategory(Guid categoryId, Category categoryData)
+        public IActionResult UpdateCategory(Guid categoryId, UpdateCreateDto categoryData)
         {
             var foundCategory = categories.FirstOrDefault(category => category.CategoryId == categoryId);
             if (foundCategory == null) return NotFound(new { Message = "No Category Found", isSuccess = false });
