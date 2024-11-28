@@ -6,12 +6,6 @@
 ###
 
 Get  http://localhost:5171/api/categories
-Content-Type: application/json
-
-{
-  "CategoryName": "string",
-  "CategoryDescription": "string",
-}
 
 ###
 

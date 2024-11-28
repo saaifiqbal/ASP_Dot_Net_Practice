@@ -1,6 +1,6 @@
 namespace asp_net_ecommerce_web_api.DTO
 {
-    public class ReadCreateDto
+    public class ReadCategoryDto
     {
         public Guid CategoryId { get; set; }
         public string? CategoryName { get; set; }
